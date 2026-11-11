@@ -51,8 +51,12 @@ class MathQuiz:
         b_hard = Button(self.difficulty_frame, text="3. Advanced", command=lambda: self.change_difficulty("advanced"))
         b_hard.pack()
 
-    def displayProblem(self):
+    def displayResults(self):
+        #displays the results
+        score_l = Label(self.results_frame, text=f"Score: {self.user_score}/{self.number_of_questions * 10}")
+        score_l.pack()
 
+    def displayProblem(self):
             #generate required values and operation
             num_a = self.randomInt()
             num_b = self.randomInt()
@@ -72,7 +76,8 @@ class MathQuiz:
                             command=lambda: self.isCorrect(user_answer.get(),num_a,num_b,operation))
             submit.pack()
 
-            self.current_question += 1
+            #increment current question
+
 
 
     def randomInt(self):
@@ -91,13 +96,21 @@ class MathQuiz:
         return random.choice(operations)
 
     def update_question(self):
-        #clear the problem frame and run it again to generate new questions
-        #If we are done it goes to the results
+        #resets attempts and increments current question counter
+        self.current_question += 1
+        self.attempt = 1
+
+        #clear problem_frame children
         self.clearFrame(self.problem_frame)
+
         if self.current_question <= self.number_of_questions:
+            #runs display problem again for a new question
             self.displayProblem()
         else:
-            self.clearFrame(self.difficulty_frame)
+            #hide problem frame
+            self.problem_frame.forget()
+            #go to results
+            self.displayResults()
 
     def clearFrame(self, frame):
         #this clears the frame
@@ -112,12 +125,14 @@ class MathQuiz:
             print("Answer not a number")
 
         #Match operation string with the appropriate operation
-        if (operation == "+" and answer == num_a + num_b) or (operation == "-" and answer == num_a - num_b) and (self.attempt <= 2):
+        if ((operation == "+" and answer == num_a + num_b)or (operation == "-" and answer == num_a - num_b)
+                and (self.attempt <= 2)):
             print("Correct")
             self.correct_answers += 1
             output = Label(self.problem_frame, text="Problem answered correctly!")
             output.pack()
 
+            #award score based on attempt count
             if self.attempt == 1:
                 self.user_score += 10
             else:
@@ -129,19 +144,21 @@ class MathQuiz:
         else:
             #if no matches it was wrong, return false.
             print("Incorrect answer")
+            print(self.attempt)
             if self.attempt == 1:
                 output = Label(self.problem_frame, text="Incorrect answer, last attempt.")
                 output.pack()
                 self.attempt += 1
 
             elif self.attempt == 2:
+                self.attempt += 1
                 #if its over 2 it doesn't do anything so the user has to go to the next question.
+
                 output = Label(self.problem_frame, text="Wrong answer.")
                 output.pack()
 
                 next_question = Button(self.problem_frame, text="Next", command=lambda: self.update_question())
                 next_question.pack()
-                self.attempt += 1
 
 
 
