@@ -40,6 +40,13 @@ class alexaJoke:
                              )
         next_joke_b.grid(row=0, column=2)
 
+        quit_b = Button(self.buttonFrame,
+                             text="Quit",
+                             command=lambda: self.root.destroy(),
+                             font=("Arial", 10)
+                             )
+        quit_b.grid(row=0, column=3)
+
     def display_joke(self):
         #check if joke has already been displayed, return if it has.
         if self.joke_displayed:
