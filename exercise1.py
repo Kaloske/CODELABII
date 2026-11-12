@@ -13,7 +13,7 @@ class MathQuiz:
         #set up initial variables
         self.chosen_difficulty = tkinter.StringVar()
         self.number_of_questions = 10
-        self.current_question = 1
+        self.current_question = 10
         self.correct_answers = 0
         self.user_score = 0
         self.attempt = 1
@@ -23,13 +23,11 @@ class MathQuiz:
         self.difficulty_frame.pack(pady=20)
 
         self.problem_frame = Frame(self.root)
-        self.problem_frame.pack(pady=20)
 
         self.output_frame = Frame(self.problem_frame)
         self.output_frame.pack(side="bottom")
 
         self.results_frame = Frame(self.root)
-        self.results_frame.pack(pady=20)
 
         #formatting variables
         self.output_padding = 15
@@ -39,6 +37,7 @@ class MathQuiz:
         #Also hides the difficulty frame
         self.chosen_difficulty.set(difficulty)
         self.difficulty_frame.forget()
+        self.problem_frame.pack(pady=20)
         self.displayProblem()
 
         print(self.chosen_difficulty.get())
@@ -72,6 +71,10 @@ class MathQuiz:
         b_hard.pack(fill="x")
 
     def displayResults(self):
+        if self.results_frame.winfo_children():
+            #clear any leftover widgets
+            self.clearFrame(self.results_frame)
+
         #initialize variable
         grade = None
 
@@ -106,6 +109,12 @@ class MathQuiz:
                         )
         grade_l.pack()
 
+        restart = Button(self.results_frame,
+                         text="Play Again?",
+                         command=lambda: self.start_quiz(),
+                         font=("Arial", 15)
+                         )
+        restart.pack()
 
     def displayProblem(self):
             #generate required values and operation
@@ -135,6 +144,20 @@ class MathQuiz:
 
             #increment current question
 
+    def start_quiz(self):
+        #reset counters for questions
+        self.current_question = 1
+        self.correct_answers = 0
+        #hide results screen and re show menu
+        self.results_frame.forget()
+
+        #if there arent any widgets we create them, if there are we just need to reshow them
+        if not self.difficulty_frame.winfo_children():
+            self.displayMenu()
+
+        #show the difficulty frame
+        self.difficulty_frame.pack()
+
 
 
     def randomInt(self):
@@ -153,36 +176,44 @@ class MathQuiz:
         return random.choice(operations)
 
     def update_question(self):
-        #resets attempts and increments current question counter
         self.current_question += 1
         self.attempt = 1
-
         #clear problem_frame children
-        self.clearProblemFrame(self.problem_frame)
-        self.clearOutputFrame()
+        self.clearProblemFrame()
+        self.clearFrame(self.output_frame)
+        print(f"current question: {self.current_question}")
+
 
         if self.current_question <= self.number_of_questions:
-            #runs display problem again for a new question
+            print("new problem")
+            # runs display problem again for a new question
             self.displayProblem()
-        else:
-            #hide problem frame
+        elif self.current_question > self.number_of_questions:
+            #hide problem_frame
             self.problem_frame.forget()
             #go to results
+            self.results_frame.pack(pady=20)
             self.displayResults()
 
-    def clearProblemFrame(self, frame):
+
+    def clearProblemFrame(self):
         #this clears the problem_frame
-        for widget in frame.winfo_children():
+        for widget in self.problem_frame.winfo_children():
             if not isinstance(widget, Frame):
                 widget.destroy()
 
-    def clearOutputFrame(self):
-        for widget in self.output_frame.winfo_children():
+    def clearFrame(self, frame):
+        for widget in frame.winfo_children():
             widget.destroy()
 
     def isCorrect(self, answer, num_a, num_b, operation):
         #First we clear the output frame to remove any loose widgets
-        self.clearOutputFrame()
+        if self.attempt > 2:
+            print("returning")
+            #return early if there are no more attempts, no need to run the rest of the code in this case.
+            return
+
+        self.clearFrame(self.output_frame)
 
         #Try turning the answer into an int, if it has an error it means it wasn't an integer.
         try:
@@ -268,6 +299,6 @@ class MathQuiz:
 
 mathquiz = MathQuiz(root)
 
-mathquiz.displayMenu()
+mathquiz.start_quiz()
 
 root.mainloop()
