@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import messagebox
-import random
 
 class StudentManager:
     def __init__(self, root):
@@ -21,11 +20,23 @@ class StudentManager:
                                     )
         view_all_records_b.pack(fill="x")
 
-        view_individual_record = Button(self.button_frame, text="Search Student",
+        view_individual_record_b = Button(self.button_frame, text="Search Student",
                                         command=lambda:self.display_individual_record(),
                                         font=("Arial", 15)
                                         )
-        view_individual_record.pack(fill="x")
+        view_individual_record_b.pack(fill="x")
+
+        highest_mark_b = Button(self.button_frame, text="Highest Mark",
+                                        command=lambda:self.display_highest_mark(),
+                                        font=("Arial", 15)
+                                        )
+        highest_mark_b.pack(fill="x")
+
+        lowest_mark_b = Button(self.button_frame, text="Lowest Mark",
+                                        command=lambda:self.display_lowest_mark(),
+                                        font=("Arial", 15)
+                                        )
+        lowest_mark_b.pack(fill="x")
 
 
 
@@ -44,6 +55,11 @@ class StudentManager:
         self.summary_frame = Frame(self.content_frame)
 
         self.individual_student_frame = Frame(self.content_frame)
+        self.student_input_frame = Frame(self.content_frame)
+
+        self.highest_mark_frame = Frame(self.content_frame)
+        self.lowest_mark_frame = Frame(self.content_frame)
+
 
         #our current frame
         self.active_frame = self.main_menu_frame
@@ -53,6 +69,7 @@ class StudentManager:
 
     def view_all_records(self):
         #update our current frame
+        self.switch_frame(self.all_student_frame, self.all_student_frame)
         self.clean_screen()
         self.active_frame = self.all_student_frame
         self.all_student_frame.pack()
@@ -71,17 +88,18 @@ class StudentManager:
                     self.total_students = int(line.strip())
                 else:
                     #call function to display the record
-                    self.display_record_row(self.all_student_frame, current_line, line)
+                    #the row is the current line - 1 because the 1st iteration reads the number of students not an entry
+                    self.display_record_row(self.all_student_frame, current_line-1, line)
 
             #display summary
             self.average_percentage_marks = self.average_percentage_marks / self.total_students
 
             self.summary_frame.pack()
-            self.display_summary(self.total_students+2)
+            self.display_summary()
             print(self.average_percentage_marks)
 
     def read_student_record(self, record):
-        #takes a signle line from the dataset and then turns it into a list. Numbers are returned as integers.
+        #takes a single line from the dataset and then turns it into a list. Numbers are returned as integers.
         student_record_list = record.split(",")
 
         #Its easier if we just convert the string numbers into integers so we dont have to worry about converting them
@@ -105,12 +123,72 @@ class StudentManager:
         else:
             return "F"
 
+    def switch_frame(self, new_active_frame, *frames):
+        #clean the screen first
+        self.clean_screen()
+        #update active frame
+        self.active_frame = new_active_frame
+        # note frame(s) are packed in order it is passed.
+        for frame in frames:
+            frame.pack()
+
+    def display_highest_mark(self):
+        #update our current frame
+        self.switch_frame(self.highest_mark_frame, self.highest_mark_frame)
+        self.header_l.configure(text="Highest Overall Mark")
+
+        with open('studentMarks.txt', 'r') as f:
+            highest_line = None
+            highest_mark = None
+            for i, line in enumerate(f, start=1):
+                if i > 1:
+                    #get values
+                    stu_id, stu_name, course1, course2, course3, exam_score = self.read_student_record(line)
+                    course_total = course1 + course2 + course3
+                    overall_percentage = ((course_total + exam_score) / 160) * 100
+
+                    # if we dont have any record or have a new higher mark we set it.
+                    if not highest_mark or overall_percentage > highest_mark:
+                        highest_line = line
+                        highest_mark = overall_percentage
+
+        #output the table
+        self.display_header(self.highest_mark_frame)
+        self.display_record_row(self.highest_mark_frame, 1, highest_line)
+
+    def display_lowest_mark(self):
+        #very similar to the highest mark function except it gets the lowest.
+        # update our current frame
+        self.switch_frame(self.lowest_mark_frame, self.lowest_mark_frame)
+        self.header_l.configure(text="Lowest Overall Mark")
+
+        with open('studentMarks.txt', 'r') as f:
+            lowest_line = None
+            lowest_mark = None
+            for i, line in enumerate(f, start=1):
+                if i > 1:
+                    # get values
+                    stu_id, stu_name, course1, course2, course3, exam_score = self.read_student_record(line)
+                    course_total = course1 + course2 + course3
+                    overall_percentage = ((course_total + exam_score) / 160) * 100
+
+                    # if we dont have any record or have a new higher mark we set it.
+                    if not lowest_line or overall_percentage < lowest_mark:
+                        lowest_line = line
+                        lowest_mark = overall_percentage
+
+        # output the table
+        self.display_header(self.lowest_mark_frame)
+        self.display_record_row(self.lowest_mark_frame, 1, lowest_line)
+
 
     def display_record_row(self, frame, current_row, record_line):
         # read the individual student records now
         stu_id, stu_name, course1, course2, course3, exam_score = self.read_student_record(record_line)
+        #calculate necessary values
         course_total = course1 + course2 + course3
         overall_percentage = ((course_total + exam_score) / 160) * 100
+        #call function to get grade
         grade = self.grade_from_int(overall_percentage)
         print(grade)
 
@@ -141,7 +219,7 @@ class StudentManager:
 
     def display_header(self, frame):
         #displays the header, row 0 is always the header
-        entry_l = Label(frame, text="Entry")
+        entry_l = Label(frame, text="Row")
         entry_l.grid(row=0, column=0, pady=10, padx=10, sticky="e")
 
         id_l = Label(frame, text="ID")
@@ -162,7 +240,7 @@ class StudentManager:
         stu_grade = Label(frame, text="Grade")
         stu_grade.grid(row=0, column=6, pady=10, padx=10, sticky="e")
 
-    def display_summary(self, sum_row):
+    def display_summary(self):
         total_students_l = Label(self.summary_frame,
                                  text=f"There are {self.total_students} in the class.")
         total_students_l.pack()
@@ -212,10 +290,12 @@ class StudentManager:
                     try:
                         if int(query) == stu_id:
                             match = line
+                            break
                     except ValueError:
                         #we try to match the name instead. Normalize it first to avoid any bugs
                         if query.lower() == stu_name.lower():
                             match = line
+                            break
 
             if match:
                 self.clear_frame(self.active_frame)
@@ -230,21 +310,18 @@ class StudentManager:
 
     def display_individual_record(self):
         #create frame for input
+        #Note we pass input frame first because we want it to be packed first.
+        self.switch_frame(self.individual_student_frame, self.student_input_frame,self.individual_student_frame)
 
-        self.clean_screen()
-        self.active_frame = self.individual_student_frame
-        student_input_frame = Frame(self.content_frame)
-        student_input_frame.pack()
-        self.individual_student_frame.pack()
 
         #this is the header
         self.header_l.configure(text="Search Student Record")
 
 
-        student_entry = Entry(student_input_frame)
+        student_entry = Entry(self.student_input_frame)
         student_entry.grid(row=0, column=0, pady=10, sticky="e")
 
-        enter_b = Button(student_input_frame, text="Search",
+        enter_b = Button(self.student_input_frame, text="Search",
                          command=lambda:self.search_student(student_entry.get()))
         enter_b.grid(row=0, column=1, pady=10, sticky="e")
 
