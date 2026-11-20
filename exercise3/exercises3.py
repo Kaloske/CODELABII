@@ -40,13 +40,13 @@ class StudentManager:
 
 
 
-        self.content_frame = Frame(self.root)
-        self.content_frame.pack(side="left", fill="both", expand=TRUE)
+        self.content_frame = Frame(self.root, bg="white")
+        self.content_frame.pack(side="left", fill="both", expand=TRUE, pady=20, padx=20)
 
-        self.header_frame = Frame(self.content_frame)
+        self.header_frame = Frame(self.content_frame, bg="white")
         self.header_frame.pack(pady=(0, 20))
 
-        self.header_l = Label(self.header_frame, text="Header", font=("Arial", 15))
+        self.header_l = Label(self.header_frame, text="Header", font=("Arial", 15), bg="white")
         self.header_l.pack(side="top")
 
         self.main_menu_frame = Frame(self.content_frame)
@@ -80,6 +80,9 @@ class StudentManager:
         with open("studentMarks.txt") as f:
             #create the header first.
             self.display_header(self.all_student_frame)
+
+            #Reset the average percentage marks
+            self.average_percentage_marks = 0
 
             for current_line, line in enumerate(f, start=1):
                 if current_line == 1:
@@ -228,13 +231,13 @@ class StudentManager:
         name_l = Label(frame, text="Name")
         name_l.grid(row=0, column=2, pady=10, padx=10, sticky="e")
 
-        course_total_l = Label(frame, text="Course Total")
+        course_total_l = Label(frame, text="Course\nTotal")
         course_total_l.grid(row=0, column=3, pady=10, padx=10, sticky="e")
 
         exam_score_l = Label(frame, text="Exam Score")
         exam_score_l.grid(row=0, column=4, pady=10, padx=10, sticky="e")
 
-        overall_percentage_l = Label(frame, text="Overall Percentage")
+        overall_percentage_l = Label(frame, text="Overall\nPercentage")
         overall_percentage_l.grid(row=0, column=5, pady=10, padx=10, sticky="e")
 
         stu_grade = Label(frame, text="Grade")

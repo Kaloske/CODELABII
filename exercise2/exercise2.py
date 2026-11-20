@@ -6,8 +6,7 @@ class alexaJoke:
         self.root = root
         self.root.title("Alexa Joke")
         #track current joke and punchline
-        self.current_joke = None
-        self.current_punchline = None
+        self.current_joke_line = None
         #variable to check if joke and punchline have been displayed
         self.joke_displayed = False
         self.punchline_displayed = False
@@ -18,34 +17,41 @@ class alexaJoke:
         self.jokeFrame = Frame(self.root)
         self.jokeFrame.pack(pady=30)
 
-    def play_game(self):
-        joke_b = Button(self.buttonFrame,
+        self.joke_b = Button(self.buttonFrame,
                         text="Play Alexa Joke",
                         command=lambda: self.display_joke(),
                         font=("Arial", 10)
                         )
-        joke_b.grid(row=0, column=0)
+        self.joke_b.grid(row=0, column=0, padx=10)
 
-        punchL_b = Button(self.buttonFrame,
-                          text="Show Punchline",
-                          command=lambda: self.display_punchline(self.current_punchline),
-                          font=("Arial", 10)
+        self.punchL_b = Button(self.buttonFrame,text="Show Punchline",
+                               command=lambda: self.display_punchline(self.current_punchline),
+                               font=("Arial", 10),
+                               state=DISABLED
         )
-        punchL_b.grid(row=0, column=1)
+        self.punchL_b.grid(row=0, column=1, padx=10)
 
-        next_joke_b = Button(self.buttonFrame,
-                             text="Next Joke",
-                             command=lambda: self.next_joke(),
-                             font=("Arial", 10)
-                             )
-        next_joke_b.grid(row=0, column=2)
+        self.next_joke_b = Button(self.buttonFrame,
+                                  text="Next Joke",
+                                  command=lambda: self.next_joke(),
+                                  font=("Arial", 10),
+                                  state=DISABLED)
+        self.next_joke_b.grid(row=0, column=2, padx=10)
 
-        quit_b = Button(self.buttonFrame,
+        self.quit_b = Button(self.buttonFrame,
                              text="Quit",
                              command=lambda: self.root.destroy(),
                              font=("Arial", 10)
                              )
-        quit_b.grid(row=0, column=3)
+        self.quit_b.grid(row=0, column=3, padx=10)
+
+        #labels for the joke and punchline
+        self.joke_l = Label(self.jokeFrame, text="", font=("Arial", 15))
+        self.joke_l.grid(row=0, column=0)
+
+        self.punch_l = Label(self.jokeFrame, text="", font=("Arial", 15))
+        self.punch_l.grid(row=1, column=0)
+
 
     def display_joke(self):
         #check if joke has already been displayed, return if it has.
@@ -56,12 +62,15 @@ class alexaJoke:
 
         #get random joke
         joke, punchline = self.rand_joke()
+        joke, punchline = joke.strip(), punchline.strip()
 
         #set our variables
-        self.current_joke = joke
         self.current_punchline = punchline
-        joke_l = Label(self.jokeFrame, text=self.current_joke, font=("Arial", 15))
-        joke_l.grid(row=0, column=0)
+        self.joke_l.config(text=f"{joke}?")
+        self.joke_b.config(state=DISABLED)
+
+        self.punchL_b.config(state=NORMAL)
+        self.next_joke_b.config(state=NORMAL)
         print(joke)
         print(punchline)
 
@@ -71,17 +80,20 @@ class alexaJoke:
             return
 
         self.punchline_displayed = True
-        punch_l = Label(self.jokeFrame, text=punchline, font=("Arial", 15))
-        punch_l.grid(row=1, column=0)
-
-    def clear_frame(self, frame):
-        for widget in frame.winfo_children():
-            widget.destroy()
+        self.punch_l.config(text=punchline)
+        self.punchL_b.config(state=DISABLED)
 
     def next_joke(self):
-        self.clear_frame(self.jokeFrame)
+        #reset tracker
         self.joke_displayed = False
         self.punchline_displayed = False
+
+        self.joke_l.config(text="")
+        self.punch_l.config(text="")
+
+        self.joke_b.config(state=NORMAL)
+        self.punchL_b.config(state=DISABLED)
+        self.next_joke_b.config(state=DISABLED)
 
 
     def rand_joke(self):
@@ -89,27 +101,34 @@ class alexaJoke:
         joke_line = None
 
         #open file
-        with open("randomJokes.txt") as f:
-            #pick a random line
-            rand_line = random.randint(1, 37)
-            #iterate until we get to the target line
-            for current_line, line in enumerate(f, start=1):
-                if current_line == rand_line:
-                    joke_line = line.strip()
-                    break
+        #open with utf-8 encoding because there are some weird formatting bugs without it.
+        with open("randomJokes.txt", encoding="utf-8") as f:
+            #we use a loop here because we want to pick another joke if it is the same joke as the current one.
+            while True:
+                #pick a random line
+                rand_line = random.randint(1, 37)
+                #iterate until we get to the target line
+                for current_line, line in enumerate(f, start=1):
+                    #if it is our target line we strip the joke line
+                    if current_line == rand_line:
+                        #we check to make sure it is not the same joke as the current one...
+                        if line.strip() != self.current_joke_line:
+                            print("found new joke")
+                            #we break the loop by giving joke_line a value and update our current joke line
+                            joke = line.split("?")
+                            self.current_joke_line = joke_line
+                            return joke
+                        print("no joke")
 
 
-        joke = joke_line.split("?")
-        return joke
 
 
 
 
 root = Tk()
-root.geometry("500x500")
+root.geometry("700x500")
 
 alexajoke = alexaJoke(root)
 
-alexajoke.play_game()
 
 root.mainloop()
