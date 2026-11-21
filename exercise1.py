@@ -13,14 +13,15 @@ class MathQuiz:
         #set up initial variables
         self.chosen_difficulty = tkinter.StringVar()
         self.number_of_questions = 10
-        self.current_question = 10
+        self.current_question = 0
         self.correct_answers = 0
         self.user_score = 0
         self.attempt = 1
 
+
         #create frames
         self.difficulty_frame = Frame(self.root)
-        self.difficulty_frame.pack(pady=20)
+        #self.difficulty_frame.pack(pady=20)
 
         self.problem_frame = Frame(self.root)
 
@@ -32,18 +33,9 @@ class MathQuiz:
         #formatting variables
         self.output_padding = 15
 
-    def change_difficulty(self, difficulty):
-        #set the difficulty here, print output for debugging
-        #Also hides the difficulty frame
-        self.chosen_difficulty.set(difficulty)
-        self.difficulty_frame.forget()
-        self.problem_frame.pack(pady=20)
-        self.displayProblem()
+        self.active_frame = self.difficulty_frame
 
-        print(self.chosen_difficulty.get())
-
-    def displayMenu(self):
-        #create the menu for the difficulties
+        #create buttons
         l1 = Label(self.difficulty_frame, text="Choose your difficulty.", font=("Arial", 20))
         l1.pack()
 
@@ -70,11 +62,83 @@ class MathQuiz:
                         )
         b_hard.pack(fill="x")
 
-    def displayResults(self):
-        if self.results_frame.winfo_children():
-            #clear any leftover widgets
-            self.clearFrame(self.results_frame)
+        #create problem frame stuff
+        # create label, entry, and button
+        self.question_l = Label(self.problem_frame,
+                           text=f"",
+                           font=("Arial", 20)
+                           )
+        self.question_l.pack()
 
+        self.user_answer = Entry(self.problem_frame,
+                            font=("Arial", 15)
+                            )
+        self.user_answer.pack()
+
+        # submit button runs isCorrect() function
+        self.submit = Button(self.problem_frame,
+                        text="Submit Answer",
+                        font=("Arial", 15)
+                        )
+        self.submit.pack(pady=10)
+
+        self.output = Label(self.output_frame, text="",
+                       font=("Arial", 20),
+                       fg="green")
+        self.output.pack(pady=self.output_padding)
+
+        self.next_question = Button(self.output_frame,
+                               text="Next",
+                               font=("Arial", 15),
+                               command=lambda: self.update_question(),
+                               state=DISABLED)
+        self.next_question.pack(pady=self.output_padding)
+
+        #results related
+        self.score_l = Label(self.results_frame,
+                        text=f"",
+                        font=("Arial", 20)
+                        )
+        self.score_l.pack()
+
+        self.correct_q_l = Label(self.results_frame,
+                            text=f"",
+                            font=("Arial", 20)
+                            )
+        self.correct_q_l.pack()
+
+        self.grade_l = Label(self.results_frame,
+                        text=f"",
+                        font=("Arial", 20)
+                        )
+        self.grade_l.pack()
+
+        self.restart = Button(self.results_frame,
+                         text="Play Again?",
+                         command=lambda: self.start_quiz(),
+                         font=("Arial", 15)
+                         )
+        self.restart.pack()
+
+    def change_difficulty(self, difficulty):
+        #set the difficulty here, print output for debugging
+        #Also hides the difficulty frame
+        self.chosen_difficulty.set(difficulty)
+        self.switch_frame(self.problem_frame)
+        self.displayProblem()
+
+        print(self.chosen_difficulty.get())
+
+    def switch_frame(self, frame):
+        self.active_frame.forget()
+        self.active_frame = frame
+        frame.pack()
+
+    def displayMenu(self):
+        #create the menu for the difficulties
+        self.switch_frame(self.difficulty_frame)
+
+    def displayResults(self):
         #initialize variable
         grade = None
 
@@ -91,56 +155,30 @@ class MathQuiz:
             grade = "F"
 
         #displays the results
-        score_l = Label(self.results_frame,
-                        text=f"Score: {self.user_score}/{self.number_of_questions * 10}",
-                        font=("Arial", 20)
-                        )
-        score_l.pack()
+        self.score_l.config(text=f"Score: {self.user_score}/{self.number_of_questions * 10}")
 
-        correct_q_l = Label(self.results_frame,
-                        text=f"Correct Answers: {self.correct_answers}/{self.number_of_questions}",
-                        font=("Arial", 20)
-                        )
-        correct_q_l.pack()
+        self.correct_q_l.config(text=f"Correct Answers: {self.correct_answers}/{self.number_of_questions}")
 
-        grade_l = Label(self.results_frame,
-                            text=f"Grade: {grade}",
-                            font=("Arial", 20)
-                        )
-        grade_l.pack()
+        self.grade_l.config(text=f"Grade: {grade}")
 
-        restart = Button(self.results_frame,
-                         text="Play Again?",
-                         command=lambda: self.start_quiz(),
-                         font=("Arial", 15)
-                         )
-        restart.pack()
+        self.restart.config(text="Play Again?")
 
     def displayProblem(self):
+            #we remove output text
+            self.user_answer.delete(0, END)
+            self.output.config(text="")
             #generate required values and operation
             num_a = self.randomInt()
             num_b = self.randomInt()
             operation = self.decideOperation()
 
             #create label, entry, and button
-            question_l = Label(self.problem_frame,
-                               text=f"Q{self.current_question}: {num_a} {operation} {num_b}",
-                               font=("Arial", 20)
-                               )
-            question_l.pack()
-
-            user_answer = Entry(self.problem_frame,
-                                font=("Arial", 15)
-                                )
-            user_answer.pack()
+            self.question_l.config(text=f"Q{self.current_question}: {num_a} {operation} {num_b}")
 
             #submit button runs isCorrect() function
-            submit = Button(self.problem_frame,
-                            text="Submit Answer",
-                            command=lambda: self.isCorrect(user_answer.get(),num_a,num_b,operation),
-                            font=("Arial", 15)
-                            )
-            submit.pack(pady=10)
+            user_input = self.user_answer.get()
+            self.submit.config(command=lambda:self.isCorrect(self.user_answer.get(),num_a,num_b,operation))
+            #submit.pack(pady=10)
 
             #increment current question
 
@@ -149,14 +187,8 @@ class MathQuiz:
         self.current_question = 1
         self.correct_answers = 0
         #hide results screen and re show menu
-        self.results_frame.forget()
 
-        #if there arent any widgets we create them, if there are we just need to reshow them
-        if not self.difficulty_frame.winfo_children():
-            self.displayMenu()
-
-        #show the difficulty frame
-        self.difficulty_frame.pack()
+        self.switch_frame(self.difficulty_frame)
 
 
 
@@ -179,8 +211,8 @@ class MathQuiz:
         self.current_question += 1
         self.attempt = 1
         #clear problem_frame children
-        self.clearProblemFrame()
-        self.clearFrame(self.output_frame)
+        #self.clearProblemFrame()
+        #self.clearFrame(self.output_frame)
         print(f"current question: {self.current_question}")
 
 
@@ -188,19 +220,13 @@ class MathQuiz:
             print("new problem")
             # runs display problem again for a new question
             self.displayProblem()
+            self.output.config(text="")
+            self.next_question.config(state=DISABLED)
+
         elif self.current_question > self.number_of_questions:
             #hide problem_frame
-            self.problem_frame.forget()
-            #go to results
-            self.results_frame.pack(pady=20)
+            self.switch_frame(self.results_frame)
             self.displayResults()
-
-
-    def clearProblemFrame(self):
-        #this clears the problem_frame
-        for widget in self.problem_frame.winfo_children():
-            if not isinstance(widget, Frame):
-                widget.destroy()
 
     def clearFrame(self, frame):
         for widget in frame.winfo_children():
@@ -213,7 +239,6 @@ class MathQuiz:
             #return early if there are no more attempts, no need to run the rest of the code in this case.
             return
 
-        self.clearFrame(self.output_frame)
 
         #Try turning the answer into an int, if it has an error it means it wasn't an integer.
         try:
@@ -234,10 +259,8 @@ class MathQuiz:
                 self.correct_answers += 1
 
                 #display output
-                output = Label(self.output_frame, text="Problem answered correctly!",
-                               font=("Arial", 20),
-                               fg="green")
-                output.pack(pady = self.output_padding)
+                self.output.config(text="Problem answered correctly!", fg="green")
+
 
                 # award score based on attempt count
                 if self.attempt == 1:
@@ -245,48 +268,25 @@ class MathQuiz:
                 else:
                     self.user_score += 5
 
-                next_question = Button(self.output_frame,
-                                       text="Next",
-                                       font=("Arial", 15),
-                                       command=lambda: self.update_question())
-                next_question.pack(pady = self.output_padding)
+                self.next_question.config(state=NORMAL)
 
             else:
                 # if no matches it was wrong, return false.
                 print("Incorrect answer")
                 print(self.attempt)
                 if self.attempt == 1:
-                    output = Label(self.output_frame,
-                                   text="Incorrect answer! \nLast attempt.",
-                                   font=("Arial", 20),
-                                   fg="red"
-                                   )
-                    output.pack(pady = self.output_padding)
+                    self.output.config(text="Incorrect answer! \nLast attempt.", fg="red")
                     self.attempt += 1
 
                 elif self.attempt == 2:
                     self.attempt += 1
                     # if its over 2 it doesn't do anything so the user has to go to the next question.
+                    self.output.config(text=f"The correct answer was:\n{correct_answer}", fg="red")
 
-                    output = Label(self.output_frame,
-                                   text=f"The correct answer was:\n{correct_answer}",
-                                   font=("Arial", 20),
-                                   fg="red"
-                                   )
-                    output.pack(pady = self.output_padding)
-
-                    next_question = Button(self.output_frame,
-                                           text="Next",
-                                           font=("Arial", 15),
-                                           command=lambda: self.update_question())
-                    next_question.pack()
+                    self.next_question.config(state=NORMAL)
         except ValueError:
             #something went wrong so we don't count the attempt.
-            output = Label(self.output_frame,
-                           text="Enter a valid number! \nAttempt not counted.",
-                           font=("Arial", 20),
-                           fg="red")
-            output.pack(pady = self.output_padding)
+            self.output.config(text="Enter a valid number! \nAttempt not counted.", fg="red")
 
 
 
