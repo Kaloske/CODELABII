@@ -16,7 +16,7 @@ class StudentManager:
         back_b.pack(fill="x")
 
         view_all_records_b = Button(self.button_frame, text="View All Records",
-                                    command=lambda:self.view_all_records(),
+                                    command=lambda:self.display_all_records(),
                                     font=("Arial", 15)
                                     )
         view_all_records_b.pack(fill="x")
@@ -57,8 +57,15 @@ class StudentManager:
                               )
         remove_record_b.pack(fill="x")
 
+        update_frame_b = Button(self.button_frame, text="Update Record",
+                                command=lambda: self.display_update(),
+                                font=("Arial", 15)
+                                )
+        update_frame_b.pack(fill="x")
 
-        self.content_frame = Frame(self.root, bg="white")
+
+
+        self.content_frame = Frame(self.root)
         self.content_frame.pack(side="left", fill="both", expand=TRUE, pady=20, padx=20)
 
         self.header_frame = Frame(self.content_frame, bg="white")
@@ -81,7 +88,100 @@ class StudentManager:
         self.sort_frame = Frame(self.content_frame,)
         self.sort_input_frame = Frame(self.content_frame)
 
-        self.add_record_frame = Frame(self.content_frame)
+        self.update_frame = Frame(self.content_frame)
+        self.update_input_frame = Frame(self.content_frame)
+        self.update_radio_frame = Frame(self.content_frame)
+
+        #Home menu widgets
+        menu_l = Label(self.main_menu_frame,text="Press the buttons on the sidebar to navigate menus! \n"
+                                                 "You can view all the student records or search via name or ID.",
+                       font=("Arial", 12)
+                       )
+        menu_l.pack()
+
+        #View all records widget
+        self.total_students_l = Label(self.summary_frame,
+                                 text=f"There are {self.total_students} in the class.")
+        self.total_students_l.pack()
+
+        self.average_l = Label(self.summary_frame,
+                          text=f"The percentage average was {self.average_percentage_marks:.2f}% in the class.")
+        self.average_l.pack()
+
+        #individual record widget and related values.
+        individual_info_l = Label(self.student_input_frame, text="Enter Student ID or Name")
+        individual_info_l.grid(row=0, column=0, sticky="e")
+        individual_student_entry = Entry(self.student_input_frame)
+        individual_student_entry.grid(row=1, column=0, pady=10, sticky="e")
+
+        individual_enter_b = Button(self.student_input_frame, text="Search",
+                         command=lambda:self.display_individual_student(individual_student_entry.get()))
+        individual_enter_b.grid(row=1, column=1, pady=10, sticky="e")
+
+
+        #update_frame widgets
+        update_field = StringVar(value="stu_id")
+
+        update_info_l = Label(self.update_input_frame, text="Enter Student ID or Name")
+        update_info_l.grid(row=0, column=0, sticky="e")
+
+        update_student_entry = Entry(self.update_input_frame)
+        update_student_entry.grid(row=1, column=0, sticky="e")
+
+        update_enter_b = Button(self.update_input_frame, text="Update",
+                         command=lambda:self.update(update_student_entry.get(), update_field.get()))
+        update_enter_b.grid(row=1, column=1, sticky="e")
+
+        student_id_r = Radiobutton(self.update_radio_frame, text="Student ID",
+                                   variable=update_field,
+                                   value="stu_id")
+        student_id_r.grid(row=0, column=0, sticky="w")
+
+        student_name_r = Radiobutton(self.update_radio_frame, text="Name",
+                                   variable=update_field,
+                                   value="stu_name")
+        student_name_r.grid(row=0, column=1, sticky="w")
+
+        course1_r = Radiobutton(self.update_radio_frame, text="Course 1 Marks",
+                                   variable=update_field,
+                                   value="course1")
+        course1_r.grid(row=0, column=2, sticky="w")
+
+        course2_r = Radiobutton(self.update_radio_frame, text="Course 2 Marks",
+                                   variable=update_field,
+                                   value="course2")
+        course2_r.grid(row=1, column=0, sticky="w")
+
+        course3_r = Radiobutton(self.update_radio_frame, text="Course 3 Marks",
+                                   variable=update_field,
+                                   value="course3")
+        course3_r.grid(row=1, column=1, sticky="w")
+
+        exam_r = Radiobutton(self.update_radio_frame, text="Course 4 Marks",
+                                   variable=update_field,
+                                   value="exam_score")
+        exam_r.grid(row=1, column=2, sticky="w")
+
+        #sort widgets
+        sort_option = StringVar(value="student_id")
+        order_option = StringVar(value="asc")
+
+        student_id_r = Radiobutton(self.sort_input_frame, text="Student ID", variable=sort_option, value="student_id")
+        student_id_r.grid(row=0, column=0, pady=10, sticky="e")
+
+        course_total_r = Radiobutton(self.sort_input_frame, text="Course Total", variable=sort_option,
+                                     value="course_total")
+        course_total_r.grid(row=0, column=1, pady=10, sticky="e")
+
+        asc_r = Radiobutton(self.sort_input_frame, text="Ascending", variable=order_option, value="asc")
+        asc_r.grid(row=1, column=0, pady=10, sticky="e")
+
+        dsc_r = Radiobutton(self.sort_input_frame, text="Descending", variable=order_option, value="dsc")
+        dsc_r.grid(row=1, column=1, pady=10, sticky="e")
+
+        sort_b = Button(self.sort_input_frame, text="Sort",
+                        command=lambda: self.sort(sort_option.get(), order_option.get()))
+        sort_b.grid(row=0, column=2, pady=10, sticky="e")
 
 
         #our current frame
@@ -90,13 +190,9 @@ class StudentManager:
         self.root.geometry("800x600")
         self.root.title("Student Manager")
 
-    def view_all_records(self):
+    def display_all_records(self):
         #update our current frame
-        self.switch_frame(self.all_student_frame, self.all_student_frame)
-        self.clean_screen()
-        self.active_frame = self.all_student_frame
-        self.all_student_frame.pack()
-
+        self.switch_frame(self.all_student_frame, self.all_student_frame, self.summary_frame)
         self.header_l.configure(text="All Students")
 
 
@@ -118,8 +214,10 @@ class StudentManager:
             #display summary
             self.average_percentage_marks = self.average_percentage_marks / self.total_students
 
-            self.summary_frame.pack()
-            self.display_summary()
+            #update the summary labels
+            self.total_students_l.config(text=f"There are {self.total_students} in the class.")
+            self.average_l.config(text=f"The percentage average was {self.average_percentage_marks:.2f}% in the class.")
+
             print(self.average_percentage_marks)
 
     def read_student_record(self, record):
@@ -136,6 +234,7 @@ class StudentManager:
         return student_record_list
 
     def grade_from_int(self, grade_int):
+        #very simple, just returns a grade from an integer
         if grade_int >= 90:
             return "A"
         elif 90 > grade_int >= 80:
@@ -148,6 +247,7 @@ class StudentManager:
             return "F"
 
     def switch_frame(self, new_active_frame, *frames):
+        #for switching frames.
         #clean the screen first
         self.clean_screen()
         #update active frame
@@ -264,15 +364,6 @@ class StudentManager:
         stu_grade = Label(frame, text="Grade")
         stu_grade.grid(row=0, column=6, pady=10, padx=10, sticky="e")
 
-    def display_summary(self):
-        total_students_l = Label(self.summary_frame,
-                                 text=f"There are {self.total_students} in the class.")
-        total_students_l.pack()
-
-        average_l = Label(self.summary_frame,
-                          text=f"The percentage average was {self.average_percentage_marks:.2f}% in the class.")
-        average_l.pack()
-
     def clean_screen(self):
         #this function cleans the current screen to prepare transition to a new frame.
         #this should be called before displaying a new frame to avoid any visual bugs.
@@ -282,7 +373,6 @@ class StudentManager:
         for frame in self.content_frame.winfo_children():
             #make sure the screen is clear before we do anything
             if frame != self.header_frame:
-                self.clear_frame(frame)
                 frame.forget()
                 self.active_frame.forget()
 
@@ -292,16 +382,9 @@ class StudentManager:
 
     def display_main_menu(self):
         #switch screens
-        self.clean_screen()
-        self.active_frame = self.main_menu_frame
-        self.main_menu_frame.pack()
-
+        self.switch_frame(self.main_menu_frame, self.main_menu_frame)
         self.header_l.configure(text="Home Menu")
-        menu_l = Label(self.main_menu_frame,text="Press the buttons on the sidebar to navigate menus! \n"
-                                                 "You can view all the student records or search via name or ID.",
-                       font=("Arial", 12)
-                       )
-        menu_l.pack()
+
 
     def search_student_line(self, query):
         match = None
@@ -325,6 +408,7 @@ class StudentManager:
                 return None
 
     def display_individual_student(self, query):
+        print(query)
         match = self.search_student_line(query)
         if match:
             self.clear_frame(self.active_frame)
@@ -334,25 +418,14 @@ class StudentManager:
             #we can show an error here
             messagebox.showerror("Student Not Found! ","Type a valid ID or Name.")
 
-
-
-
     def display_individual_record(self):
         #create frame for input
         #Note we pass input frame first because we want it to be packed first.
         self.switch_frame(self.individual_student_frame, self.student_input_frame,self.individual_student_frame)
-
-
         #this is the header
         self.header_l.configure(text="Search Student Record")
 
 
-        student_entry = Entry(self.student_input_frame)
-        student_entry.grid(row=0, column=0, pady=10, sticky="e")
-
-        enter_b = Button(self.student_input_frame, text="Search",
-                         command=lambda:self.display_individual_student(student_entry.get()))
-        enter_b.grid(row=0, column=1, pady=10, sticky="e")
 
     def get_total(self):
         with open('studentMarks.txt', 'r') as f:
@@ -361,7 +434,7 @@ class StudentManager:
     def sort(self, sort_option, order):
         self.clear_frame(self.sort_frame)
         matched_line = None
-        #I generally avoided loading the txt file into a list in this program.
+        #I generally avoided loading the txt file into a list in this program as a bit of a self imposed challenge.
         #Here however it was much easier handling the sorting with lists.
         unsorted_lines = []
         sorted_lines = []
@@ -422,23 +495,7 @@ class StudentManager:
         if self.active_frame is not self.sort_frame:
             self.switch_frame(self.sort_frame, self.sort_input_frame, self.sort_frame)
             self.header_l.configure(text="Sort Student Record")
-            sort_option = StringVar(value="student_id")
-            order_option = StringVar(value="asc")
 
-            student_id_r = Radiobutton(self.sort_input_frame, text="Student ID", variable=sort_option, value="student_id")
-            student_id_r.grid(row=0, column=0, pady=10, sticky="e")
-
-            course_total_r = Radiobutton(self.sort_input_frame, text="Course Total", variable=sort_option, value="course_total")
-            course_total_r.grid(row=0, column=1, pady=10, sticky="e")
-
-            asc_r = Radiobutton(self.sort_input_frame, text="Ascending", variable=order_option, value="asc")
-            asc_r.grid(row=1, column=0, pady=10, sticky="e")
-
-            dsc_r = Radiobutton(self.sort_input_frame, text="Descending", variable=order_option, value="dsc")
-            dsc_r.grid(row=1, column=1, pady=10, sticky="e")
-
-            sort_b = Button(self.sort_input_frame, text="Sort", command=lambda: self.sort(sort_option.get(), order_option.get()))
-            sort_b.grid(row=0, column=2, pady=10, sticky="e")
 
     def add_student_record(self):
         student_id = simpledialog.askstring(
@@ -471,35 +528,129 @@ class StudentManager:
                 int(course2)
                 int(course3)
                 int(exam)
+
+                #guard clause here to avoid duplicated student IDs
+                match = self.search_student_line(student_id)
+                if match:
+                    messagebox.showerror("Duplicate ID","Student IDs must be unique.")
+                    return
                 with open('studentMarks.txt', 'a') as f:
                     f.write(f"\n{student_id},{student_name},{course1},{course2},{course3},{exam}")
 
-                self.switch_frame(self.all_student_frame, self.all_student_frame)
-                self.view_all_records()
+                self.display_all_records()
 
             except ValueError:
-                messagebox.showerror("Invalid Record","Ensure that the format you have entered is correct.")
+                messagebox.showerror("Invalid Input","Ensure that the format you have entered is correct.")
             except TypeError:
-                messagebox.showerror("Invalid Record", "Null Values are not allowed.")
+                messagebox.showerror("Invalid Input", "Null Values are not allowed.")
 
     def remove_student_record(self):
        query = simpledialog.askstring(
-            title="Enter Search", prompt="Enter a name or student ID to remove:"
-        )
-
+           title="Enter Search", prompt="Enter a name or student ID to remove:"
+       )
+        #guard clause to check if the query not a null value
+       if not query:
+           messagebox.showerror("Invalid Input", "Null Values are not allowed.")
+           return
+       #search for the student
        match = self.search_student_line(query)
-       if match:
-           confirmation = messagebox.askyesno(
-               title="Confirm Entry", message="Are you sure that you want to remove this record?")
-           if confirmation:
-               with open('studentMarks.txt', 'r') as f:
-                   lines = f.readlines()
-               with open('studentMarks.txt', 'w') as f:
-                   for line in lines:
-                       if line.strip() and match not in line:
-                           f.write(line.strip() + "\n")
-       else:
+       #guard clause to search for the student.
+       if not match:
            messagebox.showerror("Student Not Found", "Enter a valid name or student ID.")
+           return
+
+       confirmation = messagebox.askyesno(
+           title="Confirm Entry", message="Are you sure that you want to remove this record?")
+       if confirmation:
+           with open('studentMarks.txt', 'r') as f:
+               lines = f.readlines()
+           with open('studentMarks.txt', 'w') as f:
+               for line in lines:
+                   #to remove it we write everything except that line we want to remove.
+                   if line.strip() != match:
+                       f.write(line.strip() + "\n")
+
+           #using r+ here because we dont really need two separate with opens...
+           with open("studentMarks.txt", "r+", encoding="utf-8") as f:
+               content = f.read().rstrip("\n")  # Removes only trailing newlines at the very end
+               f.write(content)
+
+            #we'll go back to the frame with all the records.
+           self.switch_frame(self.all_student_frame, self.all_student_frame)
+           self.display_all_records()
+
+    def update(self, query, update_field):
+        new_value = simpledialog.askstring(
+            title="Update Field", prompt="Enter new value to update:"
+        )
+        #first we check if it not null
+        if not query:
+            messagebox.showerror("Null Error", "Null Values not Supported.")
+            return
+
+        match = self.search_student_line(query)
+
+        #return if we have no match
+        if not match:
+            messagebox.showerror("Student Not Found", "Enter a valid name or student ID.")
+            return
+
+        if update_field in ("stu_id", "course1", "course2", "course3", "exam_score"):
+            #try to convert the new value into an int if its a numeric field. An exception means its invalid.
+            try:
+                int(new_value)
+            except ValueError:
+                messagebox.showerror("Invalid Input", "Input must be a number for the selected field.")
+                return
+
+        print("proceeding to update")
+        #unpack the student line so we can edit fields individually.
+        stu_id, stu_name, course1, course2, course3, exam_score = self.read_student_record(match)
+        #we update the value here depending on what the user selected.
+        match update_field:
+            case "stu_id":
+                stu_id = new_value
+            case "stu_name":
+                stu_name = new_value
+            case "course1":
+                course1 = new_value
+            case "course2":
+                course2 = new_value
+            case "course3":
+                course3 = new_value
+            case "exam_score":
+                exam_score = new_value
+
+        #make our updated line
+        updated_student_line = f"{stu_id},{stu_name},{course1},{course2},{course3},{exam_score}"
+        print(updated_student_line)
+
+        with open('studentMarks.txt', 'r') as f:
+            lines = f.readlines()
+        #Now we can search for that line in the txt file and then replace it.
+        for i, line in enumerate(lines):
+
+            if line.strip() == match.strip():
+                print(f"matched with {line.strip()}")
+                lines[i] = updated_student_line
+                #if we've found it we can break the loop
+                break
+
+        with open('studentMarks.txt', 'w') as f:
+            #write it into the txt file
+            print("writing")
+            f.writelines(lines)
+
+
+
+    def display_update(self):
+        self.switch_frame(self.update_frame, self.update_input_frame, self.update_radio_frame, self.update_frame)
+        self.header_l.configure(text="Update Frame")
+
+
+
+
+
 
 root = Tk()
 
