@@ -1,10 +1,6 @@
 import tkinter
 import random
 from tkinter import *
-from traceback import clear_frames
-
-root = Tk()
-root.geometry("400x300")
 
 class MathQuiz:
     def __init__(self, root):
@@ -78,7 +74,8 @@ class MathQuiz:
         # submit button runs isCorrect() function
         self.submit = Button(self.problem_frame,
                         text="Submit Answer",
-                        font=("Arial", 15)
+                        font=("Arial", 15),
+                        command=lambda: self.isCorrect(self.user_answer.get(), num_a=0, num_b=0, operation="+")
                         )
         self.submit.pack(pady=10)
 
@@ -90,7 +87,7 @@ class MathQuiz:
         self.next_question = Button(self.output_frame,
                                text="Next",
                                font=("Arial", 15),
-                               command=lambda: self.update_question(),
+                               command= self.update_question,
                                state=DISABLED)
         self.next_question.pack(pady=self.output_padding)
 
@@ -176,11 +173,8 @@ class MathQuiz:
             self.question_l.config(text=f"Q{self.current_question}: {num_a} {operation} {num_b}")
 
             #submit button runs isCorrect() function
-            user_input = self.user_answer.get()
             self.submit.config(command=lambda:self.isCorrect(self.user_answer.get(),num_a,num_b,operation))
-            #submit.pack(pady=10)
 
-            #increment current question
 
     def start_quiz(self):
         #reset counters for questions
@@ -189,8 +183,6 @@ class MathQuiz:
         #hide results screen and re show menu
 
         self.switch_frame(self.difficulty_frame)
-
-
 
     def randomInt(self):
         #for my program I decided that moderate is only 2 digit numbers (to avoid getting single digits in both)
@@ -288,17 +280,10 @@ class MathQuiz:
             #something went wrong so we don't count the attempt.
             self.output.config(text="Enter a valid number! \nAttempt not counted.", fg="red")
 
-
-
-
-
-
-
-
-
-
+root = Tk()
+root.title("Math Quiz")
+root.geometry("400x300")
 mathquiz = MathQuiz(root)
-
 mathquiz.start_quiz()
 
 root.mainloop()

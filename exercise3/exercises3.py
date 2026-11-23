@@ -174,11 +174,19 @@ class StudentManager:
                                      value="course_total")
         course_total_r.grid(row=0, column=1, pady=10, sticky="e")
 
+        exam_r = Radiobutton(self.sort_input_frame, text="Exam Score", variable=sort_option,
+                                     value="exam_score")
+        exam_r.grid(row=0, column=2, pady=10, sticky="e")
+
+        overall_r = Radiobutton(self.sort_input_frame, text="Overall", variable=sort_option,
+                                     value="overall")
+        overall_r.grid(row=0, column=3, pady=10, sticky="e")
+
         asc_r = Radiobutton(self.sort_input_frame, text="Ascending", variable=order_option, value="asc")
-        asc_r.grid(row=0, column=2, pady=10, sticky="e")
+        asc_r.grid(row=1, column=0, sticky="e")
 
         dsc_r = Radiobutton(self.sort_input_frame, text="Descending", variable=order_option, value="dsc")
-        dsc_r.grid(row=0, column=3, pady=10, sticky="e")
+        dsc_r.grid(row=1, column=1, sticky="e")
 
         sort_b = Button(self.sort_input_frame, text="Sort",
                         command=lambda: self.sort(sort_option.get(), order_option.get()))
@@ -187,15 +195,17 @@ class StudentManager:
         # our current frame
         self.active_frame = self.main_menu_frame
 
-        self.root.geometry("800x600")
+        self.root.geometry("800x700")
         self.root.title("Student Manager")
 
     def display_all_records(self):
         # update our current frame
         self.switch_frame(self.all_student_frame, self.all_student_frame, self.summary_frame)
         self.header_l.configure(text="All Students")
+        #reset the table
+        self.clear_frame(self.all_student_frame)
 
-        with open("studentMarks.txt") as f:
+        with open("studentMarks.txt", 'r') as f:
             # create the header first.
             self.display_header(self.all_student_frame)
 
@@ -451,31 +461,72 @@ class StudentManager:
                 # calculate necessary values
                 course_total = course1 + course2 + course3
                 overall_percentage = ((course_total + exam_score) / 160) * 100
-                match order:
+
+                match sort_option:
                     # whe match it with whatever order.
-                    case "asc":
-                        if sort_option == "student_id":
+                    case "student_id":
+                        if order == "asc":
                             if previous_category is None or stu_id > previous_category:
                                 # we check if it has already been added to the sorted list.
-                                if line not in sorted_lines:
-                                    previous_category = stu_id
-                                    matched_line = line
-                        elif sort_option == "course_total":
-                            if previous_category is None or course_total > previous_category:
-                                if line not in sorted_lines:
-                                    previous_category = course_total
-                                    matched_line = line
-                    case "dsc":
-                        if sort_option == "student_id":
+                                if line in sorted_lines:
+                                    continue
+                                previous_category = stu_id
+                                matched_line = line
+                        if order == "dsc":
                             if previous_category is None or stu_id < previous_category:
-                                if line not in sorted_lines:
-                                    previous_category = stu_id
-                                    matched_line = line
-                        elif sort_option == "course_total":
+                                # we check if it has already been added to the sorted list.
+                                if line in sorted_lines:
+                                    continue
+                                previous_category = stu_id
+                                matched_line = line
+
+                    case "course_total":
+                        if order == "asc":
+                            if previous_category is None or course_total > previous_category:
+                                # we check if it has already been added to the sorted list.
+                                if line in sorted_lines:
+                                    continue
+                                previous_category = course_total
+                                matched_line = line
+                        if order == "dsc":
                             if previous_category is None or course_total < previous_category:
-                                if line not in sorted_lines:
-                                    previous_category = course_total
-                                    matched_line = line
+                                # we check if it has already been added to the sorted list.
+                                if line in sorted_lines:
+                                    continue
+                                previous_category = course_total
+                                matched_line = line
+
+                    case "exam_score":
+                        if order == "asc":
+                            if previous_category is None or exam_score > previous_category:
+                                # we check if it has already been added to the sorted list.
+                                if line in sorted_lines:
+                                    continue
+                                previous_category = exam_score
+                                matched_line = line
+                        if order == "dsc":
+                            if previous_category is None or exam_score < previous_category:
+                                # we check if it has already been added to the sorted list.
+                                if line in sorted_lines:
+                                    continue
+                                previous_category = exam_score
+                                matched_line = line
+
+                    case "overall":
+                        if order == "asc":
+                            if previous_category is None or overall_percentage > previous_category:
+                                # we check if it has already been added to the sorted list.
+                                if line in sorted_lines:
+                                    continue
+                                previous_category = overall_percentage
+                                matched_line = line
+                        if order == "dsc":
+                            if previous_category is None or overall_percentage < previous_category:
+                                # we check if it has already been added to the sorted list.
+                                if line in sorted_lines:
+                                    continue
+                                previous_category = overall_percentage
+                                matched_line = line
 
                         print(f"compared {line} against {matched_line}")
 
@@ -520,7 +571,7 @@ class StudentManager:
             return
 
         # check if anything is null
-        if None in (student_id, student_name, course1, course2, course3, exam):
+        if student_name == '':
             messagebox.showerror("Invalid Input", "Null Values are not allowed.")
             return
 
@@ -529,6 +580,15 @@ class StudentManager:
         if match:
             messagebox.showerror("Duplicate ID", "Student IDs must be unique.")
             return
+
+        with open('studentMarks.txt', 'r') as f:
+            lines = f.readlines()
+            print(lines[0])
+
+        with open('studentMarks.txt', 'w') as f:
+            lines[0] = f"{int(lines[0]) + 1}\n"
+            print(lines[0])
+            f.writelines(lines)
 
         with open('studentMarks.txt', 'a') as f:
             f.write(f"\n{student_id},{student_name},{course1},{course2},{course3},{exam}")
@@ -556,15 +616,17 @@ class StudentManager:
             with open('studentMarks.txt', 'r') as f:
                 lines = f.readlines()
             with open('studentMarks.txt', 'w') as f:
-                for line in lines:
-                    # to remove it we write everything except that line we want to remove.
-                    if line.strip() != match:
-                        f.write(line.strip() + "\n")
-
-            # using r+ here because we dont really need two separate with opens...
-            with open("studentMarks.txt", "r+", encoding="utf-8") as f:
-                content = f.read().rstrip("\n")  # Removes only trailing newlines at the very end
-                f.write(content)
+                new_total = int(lines[0]) - 1
+                for i, line in enumerate(lines):
+                    if i == 0:
+                        #we update the new total for the first line
+                        f.write(f"{new_total}\n")
+                    elif line.strip() != match:
+                        #to remove it we write everything except that line we want to remove.
+                        f.write(line.strip())
+                        #if the index is equal to the new total we are at the end so we dont need to write a new line.
+                        if i != new_total:
+                            f.write("\n")
 
             # we'll go back to the frame with all the records.
             self.switch_frame(self.all_student_frame, self.all_student_frame)
@@ -620,10 +682,12 @@ class StudentManager:
             lines = f.readlines()
         # Now we can search for that line in the txt file and then replace it.
         for i, line in enumerate(lines):
-
             if line.strip() == match.strip():
                 print(f"matched with {line.strip()}")
-                lines[i] = updated_student_line + "\n"
+                lines[i] = updated_student_line
+                #if we are at the end of the text file we dont need the new line
+                if i > len(lines):
+                    lines[i] = lines[i] + "\n"
                 # if we've found it we can break the loop
                 break
 

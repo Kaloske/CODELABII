@@ -20,13 +20,13 @@ class alexaJoke:
         self.joke_b = Button(self.buttonFrame,
                         text="Play Alexa Joke",
                         command=lambda: self.display_joke(),
-                        font=("Arial", 10)
+                        font=("Arial", 15)
                         )
         self.joke_b.grid(row=0, column=0, padx=10)
 
         self.punchL_b = Button(self.buttonFrame,text="Show Punchline",
                                command=lambda: self.display_punchline(self.current_punchline),
-                               font=("Arial", 10),
+                               font=("Arial", 15),
                                state=DISABLED
         )
         self.punchL_b.grid(row=0, column=1, padx=10)
@@ -34,14 +34,14 @@ class alexaJoke:
         self.next_joke_b = Button(self.buttonFrame,
                                   text="Next Joke",
                                   command=lambda: self.next_joke(),
-                                  font=("Arial", 10),
+                                  font=("Arial", 15),
                                   state=DISABLED)
         self.next_joke_b.grid(row=0, column=2, padx=10)
 
         self.quit_b = Button(self.buttonFrame,
                              text="Quit",
                              command=lambda: self.root.destroy(),
-                             font=("Arial", 10)
+                             font=("Arial", 15)
                              )
         self.quit_b.grid(row=0, column=3, padx=10)
 
@@ -118,11 +118,6 @@ class alexaJoke:
                             joke = line.split("?")
                             self.current_joke_line = joke_line
                             return joke
-
-
-
-
-
 
 root = Tk()
 root.geometry("700x500")
