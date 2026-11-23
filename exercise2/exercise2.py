@@ -97,9 +97,9 @@ class alexaJoke:
 
 
     def rand_joke(self):
+        #instead of just using readlines I wanted to use a for loop.
         print("reading a random joke")
         joke_line = None
-
         #open file
         #open with utf-8 encoding because there are some weird formatting bugs without it.
         with open("randomJokes.txt", encoding="utf-8") as f:
@@ -118,7 +118,6 @@ class alexaJoke:
                             joke = line.split("?")
                             self.current_joke_line = joke_line
                             return joke
-                        print("no joke")
 
 
 
