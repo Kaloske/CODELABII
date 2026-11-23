@@ -556,21 +556,47 @@ class StudentManager:
         student_id = simpledialog.askinteger(
             title="Input", prompt="Enter a Number for Student ID:"
         )
+        #to make cancelling end the prompts early, we have guard clauses to return when cancelled.
+        if not student_id:
+            return
+
         student_name = simpledialog.askstring(
             title="Input", prompt="Enter Student Name:"
         )
+
+        #here the condition is different. If a user continues but doesn't type anything it is assigned an empty '' string
+        #The problem is that an empty string is evaluated as false
+        #so we explicitly check if it is none here so that only pressing cancel (which assigns None) returns the func.
+        if student_name is None:
+            return
+
         course1 = simpledialog.askinteger(
             title="Input", prompt="Enter a Number for Course 1 Marks:"
         )
+
+        if not course1:
+            return
+
         course2 = simpledialog.askinteger(
             title="Input", prompt="Enter a Number for Course 2 Marks:"
         )
+
+        if not course2:
+            return
+
         course3 = simpledialog.askinteger(
             title="Input", prompt="Enter a Number for Course 3 Marks:"
         )
+
+        if not course3:
+            return
+
         exam = simpledialog.askinteger(
             title="Input", prompt="Enter a Number for Exam Marks:"
         )
+
+        if not exam:
+            return
 
         confirmation = messagebox.askyesno(
             title="Confirm Entry", message="Are you sure that you want to enter this record?"
@@ -581,8 +607,8 @@ class StudentManager:
             return
 
         # check if anything is null
-        if student_name == '':
-            messagebox.showerror("Invalid Input", "Null Values are not allowed.")
+        if not student_name:
+            messagebox.showerror("Invalid Input", "Null Names are not allowed.")
             return
 
         # guard clause here to avoid duplicated student IDs
