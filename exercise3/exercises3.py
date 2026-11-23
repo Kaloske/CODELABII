@@ -201,7 +201,6 @@ class StudentManager:
     def display_all_records(self):
         # update our current frame
         self.switch_frame(self.all_student_frame, self.all_student_frame, self.summary_frame)
-        self.header_l.configure(text="All Students")
         #reset the table
         self.clear_frame(self.all_student_frame)
 
@@ -261,6 +260,8 @@ class StudentManager:
         self.clean_screen()
         # update active frame
         self.active_frame = new_active_frame
+        #update header
+        self.update_header()
         # note frame(s) are packed in order it is passed.
         for frame in frames:
             frame.pack()
@@ -268,7 +269,6 @@ class StudentManager:
     def display_highest_mark(self):
         # update our current frame
         self.switch_frame(self.highest_mark_frame, self.highest_mark_frame)
-        self.header_l.configure(text="Highest Overall Mark")
 
         with open('studentMarks.txt', 'r') as f:
             highest_line = None
@@ -293,7 +293,6 @@ class StudentManager:
         # very similar to the highest mark function except it gets the lowest.
         # update our current frame
         self.switch_frame(self.lowest_mark_frame, self.lowest_mark_frame)
-        self.header_l.configure(text="Lowest Overall Mark")
 
         with open('studentMarks.txt', 'r') as f:
             lowest_line = None
@@ -382,16 +381,30 @@ class StudentManager:
             # make sure the screen is clear before we do anything
             if frame != self.header_frame:
                 frame.forget()
-                self.active_frame.forget()
+                #self.active_frame.forget()
 
     def clear_frame(self, frame):
         for widget in frame.winfo_children():
             widget.destroy()
 
+    def update_header(self):
+        if self.active_frame == self.main_menu_frame:
+            self.header_l.configure(text="Home Menu")
+        elif self.active_frame == self.all_student_frame:
+            self.header_l.configure(text="All Students Record")
+        elif self.active_frame == self.individual_student_frame:
+            self.header_l.configure(text="Individual Student Record")
+        elif self.active_frame == self.highest_mark_frame:
+            self.header_l.configure(text="Highest Mark Record")
+        elif self.active_frame == self.lowest_mark_frame:
+            self.header_l.configure(text="Lowest Mark Record")
+        elif self.active_frame == self.sort_frame:
+            self.header_l.configure(text="Sort Student Record")
+        elif self.active_frame == self.update_frame:
+            self.header_l.configure(text="Update Student Record")
     def display_main_menu(self):
         # switch screens
         self.switch_frame(self.main_menu_frame, self.main_menu_frame)
-        self.header_l.configure(text="Home Menu")
 
     def search_student_line(self, query):
         match = None
@@ -430,7 +443,7 @@ class StudentManager:
         # Note we pass input frame first because we want it to be packed first.
         self.switch_frame(self.individual_student_frame, self.student_input_frame, self.individual_student_frame)
         # this is the header
-        self.header_l.configure(text="Search Student Record")
+
 
     def get_total(self):
         with open('studentMarks.txt', 'r') as f:
@@ -538,9 +551,7 @@ class StudentManager:
             self.display_record_row(self.sort_frame, index + 1, i)
 
     def display_sort(self):
-        if self.active_frame is not self.sort_frame:
-            self.switch_frame(self.sort_frame, self.sort_input_frame, self.sort_frame)
-            self.header_l.configure(text="Sort Student Record")
+        self.switch_frame(self.sort_frame, self.sort_input_frame, self.sort_frame)
 
     def add_student_record(self):
         student_id = simpledialog.askinteger(
@@ -583,11 +594,9 @@ class StudentManager:
 
         with open('studentMarks.txt', 'r') as f:
             lines = f.readlines()
-            print(lines[0])
 
         with open('studentMarks.txt', 'w') as f:
             lines[0] = f"{int(lines[0]) + 1}\n"
-            print(lines[0])
             f.writelines(lines)
 
         with open('studentMarks.txt', 'a') as f:
@@ -633,7 +642,6 @@ class StudentManager:
             self.display_all_records()
 
     def update(self, query, update_field):
-
         # first we check if it not null
         if not query:
             messagebox.showerror("Null Error", "Null Values not Supported.")
@@ -698,7 +706,6 @@ class StudentManager:
 
     def display_update(self):
         self.switch_frame(self.update_frame, self.update_input_frame, self.update_radio_frame, self.update_frame)
-        self.header_l.configure(text="Update Frame")
 
 
 root = Tk()
