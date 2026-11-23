@@ -8,8 +8,6 @@ class alexaJoke:
         #track current joke and punchline
         self.current_joke_line = None
         #variable to check if joke and punchline have been displayed
-        self.joke_displayed = False
-        self.punchline_displayed = False
         #frame for buttons
         self.buttonFrame = Frame(self.root)
         self.buttonFrame.pack(pady=20)
@@ -19,7 +17,7 @@ class alexaJoke:
 
         self.joke_b = Button(self.buttonFrame,
                         text="Play Alexa Joke",
-                        command=lambda: self.display_joke(),
+                        command=self.display_joke,
                         font=("Arial", 15)
                         )
         self.joke_b.grid(row=0, column=0, padx=10)
@@ -33,17 +31,17 @@ class alexaJoke:
 
         self.next_joke_b = Button(self.buttonFrame,
                                   text="Next Joke",
-                                  command=lambda: self.next_joke(),
+                                  command=self.next_joke,
                                   font=("Arial", 15),
                                   state=DISABLED)
         self.next_joke_b.grid(row=0, column=2, padx=10)
 
-        self.quit_b = Button(self.buttonFrame,
+        quit_b = Button(self.buttonFrame,
                              text="Quit",
-                             command=lambda: self.root.destroy(),
+                             command=self.root.destroy,
                              font=("Arial", 15)
                              )
-        self.quit_b.grid(row=0, column=3, padx=10)
+        quit_b.grid(row=0, column=3, padx=10)
 
         #labels for the joke and punchline
         self.joke_l = Label(self.jokeFrame, text="", font=("Arial", 15))
@@ -54,12 +52,6 @@ class alexaJoke:
 
 
     def display_joke(self):
-        #check if joke has already been displayed, return if it has.
-        if self.joke_displayed:
-            return
-
-        self.joke_displayed = True
-
         #get random joke
         joke, punchline = self.rand_joke()
         joke, punchline = joke.strip(), punchline.strip()
@@ -76,18 +68,11 @@ class alexaJoke:
 
     def display_punchline(self, punchline):
         #check if punchline is already displayed
-        if self.punchline_displayed:
-            return
-
-        self.punchline_displayed = True
         self.punch_l.config(text=punchline)
         self.punchL_b.config(state=DISABLED)
 
     def next_joke(self):
         #reset tracker
-        self.joke_displayed = False
-        self.punchline_displayed = False
-
         self.joke_l.config(text="")
         self.punch_l.config(text="")
 

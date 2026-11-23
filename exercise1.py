@@ -202,9 +202,6 @@ class MathQuiz:
     def update_question(self):
         self.current_question += 1
         self.attempt = 1
-        #clear problem_frame children
-        #self.clearProblemFrame()
-        #self.clearFrame(self.output_frame)
         print(f"current question: {self.current_question}")
 
 
@@ -219,10 +216,6 @@ class MathQuiz:
             #hide problem_frame
             self.switch_frame(self.results_frame)
             self.displayResults()
-
-    def clearFrame(self, frame):
-        for widget in frame.winfo_children():
-            widget.destroy()
 
     def isCorrect(self, answer, num_a, num_b, operation):
         #First we clear the output frame to remove any loose widgets

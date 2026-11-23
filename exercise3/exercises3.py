@@ -194,7 +194,6 @@ class StudentManager:
 
         # our current frame
         self.active_frame = self.main_menu_frame
-
         self.root.geometry("800x700")
         self.root.title("Student Manager")
 
@@ -452,8 +451,8 @@ class StudentManager:
     def sort(self, sort_option, order):
         self.clear_frame(self.sort_frame)
         matched_line = None
-        # I generally avoided loading the txt file into a list in this program as a bit of a self imposed challenge.
-        # Here however it was much easier handling the sorting with lists.
+        # I generally avoided loading the txt file into a declared list in this program as a bit of a self imposed challenge.
+        # Here however it was much easier handling the sorting with two lists.
         unsorted_lines = []
         sorted_lines = []
         print("sorting")
