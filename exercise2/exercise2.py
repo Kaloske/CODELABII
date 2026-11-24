@@ -7,7 +7,8 @@ class alexaJoke:
         self.root.title("Alexa Joke")
         #track current joke and punchline
         self.current_joke_line = None
-        #variable to check if joke and punchline have been displayed
+        self.current_punchline = None
+
         #frame for buttons
         self.buttonFrame = Frame(self.root)
         self.buttonFrame.pack(pady=20)
@@ -15,6 +16,7 @@ class alexaJoke:
         self.jokeFrame = Frame(self.root)
         self.jokeFrame.pack(pady=30)
 
+        #Create buttons for the button frame
         self.joke_b = Button(self.buttonFrame,
                         text="Play Alexa Joke",
                         command=self.display_joke,
@@ -43,7 +45,7 @@ class alexaJoke:
                              )
         quit_b.grid(row=0, column=3, padx=10)
 
-        #labels for the joke and punchline
+        #Create labels for the joke and punchline
         self.joke_l = Label(self.jokeFrame, text="", font=("Arial", 15))
         self.joke_l.grid(row=0, column=0)
 
@@ -54,35 +56,35 @@ class alexaJoke:
     def display_joke(self):
         #get random joke
         joke, punchline = self.rand_joke()
+        #Strip any unwanted characters here
         joke, punchline = joke.strip(), punchline.strip()
 
-        #set our variables
+        #set our punchline for the joke as a variable
         self.current_punchline = punchline
+        #Configure the buttons here
         self.joke_l.config(text=f"{joke}?")
         self.joke_b.config(state=DISABLED)
 
         self.punchL_b.config(state=NORMAL)
         self.next_joke_b.config(state=NORMAL)
-        print(joke)
-        print(punchline)
 
     def display_punchline(self, punchline):
-        #check if punchline is already displayed
+        #Show the punchline, we also disable the punchline button.
         self.punch_l.config(text=punchline)
         self.punchL_b.config(state=DISABLED)
 
     def next_joke(self):
-        #reset tracker
+        #reset the labels
         self.joke_l.config(text="")
         self.punch_l.config(text="")
-
+        #Reset the button states
         self.joke_b.config(state=NORMAL)
         self.punchL_b.config(state=DISABLED)
         self.next_joke_b.config(state=DISABLED)
 
 
     def rand_joke(self):
-        #instead of just using readlines I wanted to use a for loop.
+        #instead of just using .readlines() I wanted to use a for loop.
         print("reading a random joke")
         joke_line = None
         #open file

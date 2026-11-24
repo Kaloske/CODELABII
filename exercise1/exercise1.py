@@ -14,24 +14,15 @@ class MathQuiz:
         self.user_score = 0
         self.attempt = 1
 
-
         #create frames
         self.difficulty_frame = Frame(self.root)
-        #self.difficulty_frame.pack(pady=20)
-
         self.problem_frame = Frame(self.root)
-
         self.output_frame = Frame(self.problem_frame)
         self.output_frame.pack(side="bottom")
-
         self.results_frame = Frame(self.root)
-
-        #formatting variables
-        self.output_padding = 15
-
         self.active_frame = self.difficulty_frame
 
-        #create buttons
+        #create difficulty frame widgets
         l1 = Label(self.difficulty_frame, text="Choose your difficulty.", font=("Arial", 20))
         l1.pack()
 
@@ -58,8 +49,7 @@ class MathQuiz:
                         )
         b_hard.pack(fill="x")
 
-        #create problem frame stuff
-        # create label, entry, and button
+        #create problem frame widgets
         self.question_l = Label(self.problem_frame,
                            text=f"",
                            font=("Arial", 20)
@@ -82,16 +72,16 @@ class MathQuiz:
         self.output = Label(self.output_frame, text="",
                        font=("Arial", 20),
                        fg="green")
-        self.output.pack(pady=self.output_padding)
+        self.output.pack(pady=15)
 
         self.next_question = Button(self.output_frame,
                                text="Next",
                                font=("Arial", 15),
                                command= self.update_question,
                                state=DISABLED)
-        self.next_question.pack(pady=self.output_padding)
+        self.next_question.pack(pady=15)
 
-        #results related
+        ##create results frame widgets
         self.score_l = Label(self.results_frame,
                         text=f"",
                         font=("Arial", 20)
@@ -119,9 +109,8 @@ class MathQuiz:
 
     def change_difficulty(self, difficulty):
         #set the difficulty here, print output for debugging
-        #Also hides the difficulty frame
+        #Also switches frame
         self.chosen_difficulty.set(difficulty)
-        self.switch_frame(self.problem_frame)
         self.displayProblem()
 
         print(self.chosen_difficulty.get())
@@ -132,10 +121,12 @@ class MathQuiz:
         frame.pack()
 
     def displayMenu(self):
-        #create the menu for the difficulties
+        #Switch the menu for the difficulty buttons
         self.switch_frame(self.difficulty_frame)
 
     def displayResults(self):
+        #Switch the frame
+        self.switch_frame(self.results_frame)
         #initialize variable
         grade = None
 
@@ -161,6 +152,8 @@ class MathQuiz:
         self.restart.config(text="Play Again?")
 
     def displayProblem(self):
+            #Switch frame to the problem frame
+            self.switch_frame(self.problem_frame)
             #we remove output text
             self.user_answer.delete(0, END)
             self.output.config(text="")
@@ -169,10 +162,10 @@ class MathQuiz:
             num_b = self.randomInt()
             operation = self.decideOperation()
 
-            #create label, entry, and button
+            #Configure label, entry, and button
             self.question_l.config(text=f"Q{self.current_question}: {num_a} {operation} {num_b}")
 
-            #submit button runs isCorrect() function
+            #submit button runs isCorrect() function with the proper arguments
             self.submit.config(command=lambda:self.isCorrect(self.user_answer.get(),num_a,num_b,operation))
 
 
@@ -200,13 +193,12 @@ class MathQuiz:
         return random.choice(operations)
 
     def update_question(self):
+        #Increment the question counter and reset the attempt counter.
         self.current_question += 1
         self.attempt = 1
         print(f"current question: {self.current_question}")
 
-
         if self.current_question <= self.number_of_questions:
-            print("new problem")
             # runs display problem again for a new question
             self.displayProblem()
             self.output.config(text="")
@@ -214,16 +206,12 @@ class MathQuiz:
 
         elif self.current_question > self.number_of_questions:
             #hide problem_frame
-            self.switch_frame(self.results_frame)
             self.displayResults()
 
     def isCorrect(self, answer, num_a, num_b, operation):
-        #First we clear the output frame to remove any loose widgets
+        # return early if there are no more attempts, no need to run the rest of the code in this case.
         if self.attempt > 2:
-            print("returning")
-            #return early if there are no more attempts, no need to run the rest of the code in this case.
             return
-
 
         #Try turning the answer into an int, if it has an error it means it wasn't an integer.
         try:
@@ -233,6 +221,7 @@ class MathQuiz:
             #initialize variable for now
             correct_answer = None
 
+            #calculate the correct answer given the operation as a character.
             match operation:
                 case "+":
                     correct_answer = num_a + num_b
@@ -246,7 +235,6 @@ class MathQuiz:
                 #display output
                 self.output.config(text="Problem answered correctly!", fg="green")
 
-
                 # award score based on attempt count
                 if self.attempt == 1:
                     self.user_score += 10
@@ -254,7 +242,6 @@ class MathQuiz:
                     self.user_score += 5
 
                 self.next_question.config(state=NORMAL)
-
             else:
                 # if no matches it was wrong, return false.
                 print("Incorrect answer")

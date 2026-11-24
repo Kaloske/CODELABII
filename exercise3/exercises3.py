@@ -11,6 +11,7 @@ class StudentManager:
     def __init__(self, root):
         self.root = root
         self.total_students = 0
+        self.total_marks = 0
         self.average_percentage_marks = 0
 
         # create frame for buttons
@@ -21,33 +22,45 @@ class StudentManager:
         button_frame = Frame(side_frame)
         button_frame.pack(fill="x")
 
+        #Create frame for the main content
         self.content_frame = Frame(self.root)
         self.content_frame.pack(side="left", fill="both", expand=TRUE)
 
+        #Create header frame
         self.header_frame = Frame(self.content_frame)
         self.header_frame.pack(pady=(0, 20))
 
-        self.header_l = Label(self.header_frame, text="Header", font=("Arial", 15))
-        self.header_l.pack(side="top")
 
+
+        #Create the main menu frame
         self.main_menu_frame = Frame(self.content_frame)
 
+        #Create the frames displayed when viewing all records
         self.all_student_frame = Frame(self.content_frame)
         self.summary_frame = Frame(self.content_frame)
 
+        #Create the frames for searching and displaying one student record
         self.individual_student_frame = Frame(self.content_frame)
         self.student_input_frame = Frame(self.content_frame)
 
+        #Create the two frames used for highest and lowest mark student.
         self.highest_mark_frame = Frame(self.content_frame)
         self.lowest_mark_frame = Frame(self.content_frame)
 
+        #Create the frames for the sort menu.
         self.sort_frame = Frame(self.content_frame, )
         self.sort_input_frame = Frame(self.content_frame)
 
+        #Create frames for the update menu.
         self.update_frame = Frame(self.content_frame)
         self.update_input_frame = Frame(self.content_frame)
         self.update_radio_frame = Frame(self.content_frame)
 
+        #Create header label here
+        self.header_l = Label(self.header_frame, text="Header", font=("Arial", 15))
+        self.header_l.pack(side="top")
+
+        #Create buttons for the GUI
         back_b = Button(button_frame, text="Home", command=self.display_main_menu, font=("Arial", 15))
         back_b.pack(fill="x")
 
@@ -99,14 +112,14 @@ class StudentManager:
                                 )
         update_frame_b.pack(fill="x")
 
-        # Home menu widgets
+        #Home menu widgets
         menu_l = Label(self.main_menu_frame, text="Press the buttons on the sidebar to navigate menus! \n"
                                                   "You can view all the student records or search via name or ID.",
                        font=("Arial", 12)
                        )
         menu_l.pack()
 
-        # View all records widget
+        #View all records widget
         self.total_students_l = Label(self.summary_frame, text=f"There are {self.total_students} in the class.")
         self.total_students_l.pack()
 
@@ -204,32 +217,32 @@ class StudentManager:
     def display_all_records(self):
         # update our current frame
         self.switch_frame(self.all_student_frame, self.all_student_frame, self.summary_frame)
-        #reset the table
+        #reset the table.
         self.clear_frame(self.all_student_frame)
 
         with open("studentMarks.txt", 'r') as f:
             # create the header first.
             self.display_header(self.all_student_frame)
 
-            # Reset the average percentage marks
+            # Reset the average percentage mark and total marks.
+            self.total_marks = 0
             self.average_percentage_marks = 0
 
-            for current_line, line in enumerate(f, start=1):
-                if current_line > 1:
+            for current_line, line in enumerate(f):
+                if current_line > 0:
                     # call function to display the record
-                    # the row is the current line - 1 because the 1st iteration reads the number of students not an entry
-                    self.display_record_row(self.all_student_frame, current_line - 1, line)
+                    self.display_record_row(self.all_student_frame, current_line, line)
 
+            #It is possible to just get it directly since we are reading the file, but I decided on making a function
+            #Just in case I needed to get the total in another unrelated menu.
             self.total_students = self.get_total()
 
             # display summary
-            self.average_percentage_marks = self.average_percentage_marks / self.total_students
+            self.average_percentage_marks = self.total_marks / self.get_total()
 
             # update the summary labels
             self.total_students_l.config(text=f"There are {self.total_students} in the class.")
             self.average_l.config(text=f"The percentage average was {self.average_percentage_marks:.2f}% in the class.")
-
-            print(self.average_percentage_marks)
 
     def read_student_record(self, record):
         # takes a single line from the dataset and then turns it into a list. Numbers are returned as integers.
@@ -241,6 +254,7 @@ class StudentManager:
                 index = student_record_list.index(i)
                 student_record_list[index] = int(i)
             except ValueError:
+                #If we get an error it means we cant convert it, skip to the next iteration.
                 continue
         return student_record_list
 
@@ -274,19 +288,19 @@ class StudentManager:
         self.switch_frame(self.highest_mark_frame, self.highest_mark_frame)
 
         with open('studentMarks.txt', 'r') as f:
+            #Track out highest mark and its line
             highest_line = None
             highest_mark = None
-            for i, line in enumerate(f, start=1):
-                if i > 1:
+            for i, line in enumerate(f):
+                if i > 0:
                     # get values
                     stu_id, stu_name, course1, course2, course3, exam_score = self.read_student_record(line)
                     course_total = course1 + course2 + course3
-                    overall_percentage = ((course_total + exam_score) / 160) * 100
 
-                    # if we dont have any record or have a new higher mark we set it.
-                    if not highest_mark or overall_percentage > highest_mark:
+                    # if we dont have any record or have a new higher mark we set it as our highest.
+                    if not highest_mark or course_total > highest_mark:
                         highest_line = line
-                        highest_mark = overall_percentage
+                        highest_mark = course_total
 
         # output the table
         self.display_header(self.highest_mark_frame)
@@ -298,36 +312,35 @@ class StudentManager:
         self.switch_frame(self.lowest_mark_frame, self.lowest_mark_frame)
 
         with open('studentMarks.txt', 'r') as f:
+            #Keep track of lowest mark and its line.
             lowest_line = None
             lowest_mark = None
-            for i, line in enumerate(f, start=1):
-                if i > 1:
+            for i, line in enumerate(f):
+                if i > 0:
                     # get values
                     stu_id, stu_name, course1, course2, course3, exam_score = self.read_student_record(line)
                     course_total = course1 + course2 + course3
-                    overall_percentage = ((course_total + exam_score) / 160) * 100
 
                     # if we dont have any record or have a new higher mark we set it.
-                    if not lowest_line or overall_percentage < lowest_mark:
+                    if not lowest_line or course_total < lowest_mark:
                         lowest_line = line
-                        lowest_mark = overall_percentage
+                        lowest_mark = course_total
 
         # output the table
         self.display_header(self.lowest_mark_frame)
         self.display_record_row(self.lowest_mark_frame, 1, lowest_line)
 
     def display_record_row(self, frame, current_row, record_line):
-        # read the individual student records now
+        # read the individual student records now by unpacking it first
         stu_id, stu_name, course1, course2, course3, exam_score = self.read_student_record(record_line)
         # calculate necessary values
         course_total = course1 + course2 + course3
         overall_percentage = ((course_total + exam_score) / 160) * 100
         # call function to get grade
         grade = self.grade_from_int(overall_percentage)
-        print(grade)
 
-        # add the individual marks to the average percentage variable so we can divide it later
-        self.average_percentage_marks += overall_percentage
+        # add the individual marks to the average percentage variable so we can divide it later to get an average
+        self.total_marks += overall_percentage
 
         # given data displays the columns for a single row
         entry_l = Label(frame, text=current_row)
@@ -561,6 +574,7 @@ class StudentManager:
             title="Input", prompt="Enter a Number for Student ID:"
         )
         #to make cancelling end the prompts early, we have guard clauses to return when cancelled.
+
         if not student_id:
             return
 
@@ -654,6 +668,7 @@ class StudentManager:
             with open('studentMarks.txt', 'r') as f:
                 lines = f.readlines()
             with open('studentMarks.txt', 'w') as f:
+                #Update counts
                 new_total = int(lines[0]) - 1
                 for i, line in enumerate(lines):
                     if i == 0:
@@ -667,7 +682,6 @@ class StudentManager:
                             f.write("\n")
 
             # we'll go back to the frame with all the records.
-            self.switch_frame(self.all_student_frame, self.all_student_frame)
             self.display_all_records()
 
     def update(self, query, update_field):
