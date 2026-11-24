@@ -12,7 +12,7 @@ class MathQuiz:
         self.current_question = 0
         self.correct_answers = 0
         self.user_score = 0
-        self.attempt = 1
+        self.attempt = 0
 
         #create frames
         self.difficulty_frame = Frame(self.root)
@@ -197,7 +197,7 @@ class MathQuiz:
     def update_question(self):
         #Increment the question counter and reset the attempt counter.
         self.current_question += 1
-        self.attempt = 1
+        self.attempt = 0
 
         if self.current_question <= self.number_of_questions:
             # runs display problem again for a new question
@@ -245,7 +245,9 @@ class MathQuiz:
                 self.next_question.config(state=NORMAL)
             else:
                 # if no matches it was wrong, increase attempt counter
+                print(self.attempt)
                 self.attempt += 1
+                print(self.attempt)
                 if self.attempt == 1:
                     self.output.config(text="Incorrect answer! \nLast attempt.", fg="red")
                 elif self.attempt >= 2:
