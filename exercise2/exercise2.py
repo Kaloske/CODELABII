@@ -93,29 +93,36 @@ class alexaJoke:
     def rand_joke(self):
         #instead of just using .readlines() I wanted to use a for loop.
         total_jokes = self.get_total_jokes()
+        index = total_jokes
         #open with utf-8 encoding because there are some weird formatting bugs without it.
         with open("randomJokes.txt", encoding="utf-8") as f:
             #pick a random line
             rand_line = random.randint(1, total_jokes)
-
+            previous_line = None
             #iterate until we get to the target line
             for current_line, line in enumerate(f, start=1):
-                #if it is our target line we strip the joke line
-                if current_line == rand_line:
-                    if line.strip() == self.current_joke_line:
-                        # If its the same exact joke we go to the next one
-                        if current_line == total_jokes:
-                            rand_line -= 1
-                        else:
-                            #if the line is the same as the total_jokes i.e. the last, we
-                            rand_line += 1
-                        continue
+                #First we store the previous line, so if it isn't our target line we assign it.
+                if current_line != rand_line or not previous_line:
+                    previous_line = line
 
-                #we check to make sure it is not the same joke as the current one...
-                #we break the loop by giving joke_line a value and update our current joke line
-                joke = line.split("?")
-                self.current_joke_line = line.strip()
-                return joke
+                #we check if its the same as the line we've randomly chosen
+                if current_line == rand_line:
+                    #if its the same joke we change it
+                    if self.current_joke_line == line.strip():
+                        #if we are at the very end of the line we pick the previous joke
+                        if current_line == total_jokes:
+                            self.current_joke_line = previous_line.strip()
+                            return previous_line.split("?")
+                        else:
+                            #if we arent at the end of the line we just add one to rand_line so we go to the next line
+                            rand_line += 1
+                            #continue loop to the nextl ine
+                            continue
+                    else:
+                        #if the line isn't the same as the current joke we can select it
+                        joke = line.split("?")
+                        self.current_joke_line = line.strip()
+                        return joke
 
 root = Tk()
 root.geometry("700x500")
