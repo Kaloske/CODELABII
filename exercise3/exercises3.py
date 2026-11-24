@@ -1,3 +1,7 @@
+#I used official documentation for tkinter (https://docs.python.org/3/library/tkinter.html)
+#As well as w3schools's Python File handling section (https://www.w3schools.com/python/python_file_handling.asp) as
+#References during the development of this code.
+
 from tkinter import *
 from tkinter import messagebox
 from tkinter import simpledialog
