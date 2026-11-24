@@ -390,9 +390,6 @@ class StudentManager:
     def clean_screen(self):
         # this function cleans the current screen to prepare transition to a new frame.
         # this should be called before displaying a new frame to avoid any visual bugs.
-        print("changing")
-        print(self.active_frame)
-
         for frame in self.content_frame.winfo_children():
             # make sure the screen is clear before we do anything
             if frame != self.header_frame:
@@ -444,7 +441,6 @@ class StudentManager:
                 return None
 
     def display_individual_student(self, query):
-        print(query)
         match = self.search_student_line(query)
         if match:
             self.clear_frame(self.active_frame)
@@ -472,14 +468,12 @@ class StudentManager:
         # Here however it was much easier handling the sorting with two lists.
         unsorted_lines = []
         sorted_lines = []
-        print("sorting")
         with open('studentMarks.txt', 'r') as f:
             lines = f.readlines()
         for i, line in enumerate(lines):
             if i > 0:
                 unsorted_lines.append(line.strip())
 
-        print(unsorted_lines)
         # first loop we iterate over the number of items
         for x in range(len(unsorted_lines)):
             previous_category = None
@@ -557,10 +551,7 @@ class StudentManager:
                                 previous_category = overall_percentage
                                 matched_line = line
 
-                        print(f"compared {line} against {matched_line}")
-
             sorted_lines.append(matched_line)
-        print(sorted_lines)
         # Here we create the table finally
         self.display_header(self.sort_frame)
         for index, i in enumerate(sorted_lines):
@@ -707,7 +698,6 @@ class StudentManager:
                 title="Update Field", prompt="Enter new value to update:"
             )
 
-        print("proceeding to update")
         # unpack the student line so we can edit fields individually.
         stu_id, stu_name, course1, course2, course3, exam_score = self.read_student_record(match)
         # we update the value here depending on what the user selected.
@@ -727,14 +717,12 @@ class StudentManager:
 
         # make our updated line
         updated_student_line = f"{stu_id},{stu_name},{course1},{course2},{course3},{exam_score}"
-        print(updated_student_line)
 
         with open('studentMarks.txt', 'r') as f:
             lines = f.readlines()
         # Now we can search for that line in the txt file and then replace it.
         for i, line in enumerate(lines):
             if line.strip() == match.strip():
-                print(f"matched with {line.strip()}")
                 lines[i] = updated_student_line
                 #if we are at the end of the text file we dont need the new line
                 if i > len(lines):
@@ -744,7 +732,6 @@ class StudentManager:
 
         with open('studentMarks.txt', 'w') as f:
             # write it into the txt file
-            print("writing")
             f.writelines(lines)
 
     def display_update(self):

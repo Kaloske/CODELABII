@@ -82,29 +82,40 @@ class alexaJoke:
         self.punchL_b.config(state=DISABLED)
         self.next_joke_b.config(state=DISABLED)
 
+    def get_total_jokes(self):
+        #simple function to iterate and count the number of jokes.
+        with open("randomJokes.txt", "r") as f:
+            total_jokes = 0
+            for i, line in enumerate(f, start=1):
+                total_jokes += 1
+            return total_jokes
 
     def rand_joke(self):
         #instead of just using .readlines() I wanted to use a for loop.
-        print("reading a random joke")
-        joke_line = None
-        #open file
+        total_jokes = self.get_total_jokes()
         #open with utf-8 encoding because there are some weird formatting bugs without it.
         with open("randomJokes.txt", encoding="utf-8") as f:
-            #we use a loop here because we want to pick another joke if it is the same joke as the current one.
-            while True:
-                #pick a random line
-                rand_line = random.randint(1, 37)
-                #iterate until we get to the target line
-                for current_line, line in enumerate(f, start=1):
-                    #if it is our target line we strip the joke line
-                    if current_line == rand_line:
-                        #we check to make sure it is not the same joke as the current one...
-                        if line.strip() != self.current_joke_line:
-                            print("found new joke")
-                            #we break the loop by giving joke_line a value and update our current joke line
-                            joke = line.split("?")
-                            self.current_joke_line = joke_line
-                            return joke
+            #pick a random line
+            rand_line = random.randint(1, total_jokes)
+
+            #iterate until we get to the target line
+            for current_line, line in enumerate(f, start=1):
+                #if it is our target line we strip the joke line
+                if current_line == rand_line:
+                    if line.strip() == self.current_joke_line:
+                        # If its the same exact joke we go to the next one
+                        if current_line == total_jokes:
+                            rand_line -= 1
+                        else:
+                            #if the line is the same as the total_jokes i.e. the last, we
+                            rand_line += 1
+                        continue
+
+                #we check to make sure it is not the same joke as the current one...
+                #we break the loop by giving joke_line a value and update our current joke line
+                joke = line.split("?")
+                self.current_joke_line = line.strip()
+                return joke
 
 root = Tk()
 root.geometry("700x500")

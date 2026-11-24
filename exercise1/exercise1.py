@@ -113,8 +113,6 @@ class MathQuiz:
         self.chosen_difficulty.set(difficulty)
         self.displayProblem()
 
-        print(self.chosen_difficulty.get())
-
     def switch_frame(self, frame):
         self.active_frame.forget()
         self.active_frame = frame
@@ -162,6 +160,10 @@ class MathQuiz:
             num_b = self.randomInt()
             operation = self.decideOperation()
 
+            #If we have subtraction and the second number is bigger, we use it as the first number to avoid negatives.
+            if operation == "-" and num_b > num_a:
+                num_a, num_b = num_b, num_a
+
             #Configure label, entry, and button
             self.question_l.config(text=f"Q{self.current_question}: {num_a} {operation} {num_b}")
 
@@ -196,7 +198,6 @@ class MathQuiz:
         #Increment the question counter and reset the attempt counter.
         self.current_question += 1
         self.attempt = 1
-        print(f"current question: {self.current_question}")
 
         if self.current_question <= self.number_of_questions:
             # runs display problem again for a new question
@@ -243,16 +244,12 @@ class MathQuiz:
 
                 self.next_question.config(state=NORMAL)
             else:
-                # if no matches it was wrong, return false.
-                print("Incorrect answer")
-                print(self.attempt)
+                # if no matches it was wrong, increase attempt counter
+                self.attempt += 1
                 if self.attempt == 1:
                     self.output.config(text="Incorrect answer! \nLast attempt.", fg="red")
-                    self.attempt += 1
-
-                elif self.attempt == 2:
-                    self.attempt += 1
-                    # if its over 2 it doesn't do anything so the user has to go to the next question.
+                elif self.attempt >= 2:
+                    # if its equal to or over 2 it doesn't do anything so the user has to go to the next question.
                     self.output.config(text=f"The correct answer was:\n{correct_answer}", fg="red")
 
                     self.next_question.config(state=NORMAL)
